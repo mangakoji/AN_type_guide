@@ -2,9 +2,7 @@
 //      CQ_MAX10_TOP()
 //
 //
-//J3Gu : I2C DAC MCP4726 Bridge
-//J14g
-//  IA : ULTRA_SONIC try1
+//N8RuK9: 1st for AN_TX
 
 `ifndef CQ_MAX10_TOP
 `include "../../RTL/MISC/define.vh"
@@ -126,44 +124,23 @@ module CQ_MAX10_TOP
     `w LED_G_o ;
     `w LED_B_o ;
 
-    
-    `w[ 1:0]    BUS_MODEs_i         ;//0-3:SIN,TRI,SAW,SQU
-    `w[4*8-1:0] BUS_FREQ_DECss_i    ;
-    `w[ 3:0]    BUS_GAIN_SFTs_i     ;//log /3.1
-    `w          BUS_LF_ONLY_i       ;
-    `w          REQ_i               ;
-    `w[31:0]    OSC_PHs_o           ;
-    `w[11:0]    OSC_CTRs_o          ;
-    `w`s[11:0]  WAVEs_o             ;// /s11
-    `w          WAVE_o              ;
-    `w[31:0]FREQs_o                 ;
-    `w[31:0]FREQ_QUOs_o             ;
-    `w[31:0]FREQ_REMs_o             ;
-    `w      TIC_o                   ;
-    `lp C_DIGITs = 8 ;
-    DDS_OSC
-        #(   .C_F_CK                    ( C_F_CKM   )
-//            ,.C_DIGITs                  ( C_DIGITs ) // use default value 8
-        ) DDS_OSC (     
-             .CK_i                      ( CK_i              )
+
+    `w DS_R_o ;
+    `w DS_L_o ;
+    `w SOUND_LXR_o ;
+    AN_TX
+        #(   .C_CK_Fs                   ( C_F_CKM           )
+            ,.C_TONE_Fs                 ( 440               )
+//            ,.C_SIM_KEY_SHORT_CKNs      ( 0 )
+        )AN_TX
+        (    .CK_i                      ( CK_i              )
             ,.XARST_i                   ( XARST_i           )
-            ,.BUS_MODEs_i               ( BUS_MODEs_i   )//0-3:SIN,TRI,SAW,SQU
-            ,.BUS_FREQ_DECss_i          ( BUS_FREQ_DECss_i  )
-            ,.REQ_i                     ( REQ_i             ) // default 0
-            ,.BUS_GAIN_SFTs_i           ( BUS_GAIN_SFTs_i   )// log 3.1
-            ,.BUS_LF_ONLY_i             ( BUS_LF_ONLY_i     )
-            ,.FREQs_o                   ( FREQs_o           )
-            ,.FREQ_QUOs_o               ( FREQ_QUOs_o       )
-            ,.FREQ_REMs_o               ( FREQ_REMs_o       )
-            ,.OSC_PHs_o                 ( OSC_PHs_o         )
-            ,.TIC_o                     ( TIC_o             )
-            ,.OSC_CTRs_o                ( OSC_CTRs_o        )
-            ,.WAVEs_o                   ( WAVEs_o           )
-            ,.WAVE_o                    ( WAVE_o            )
-//            ,.WAVE_REV_o                ()
-//            ,.DONE_o                    ( DONE              )
-        )                                
+            ,.DS_R_o                    ( DS_R_o            )
+            ,.DS_L_o                    ( DS_L_o            )
+            ,.SOUND_LXR_o               ( SOUND_LXR_o       )
+        ) 
     ;
+    `a LED_R_o = SOUND_LXR_o ;
 
     // JTAG Test I/Os
     wire [63:0] BJ_DBGOs ;
@@ -175,30 +152,9 @@ module CQ_MAX10_TOP
             , .source   ( BJ_DBGs    )
         ) 
     ;
-    `a BUS_FREQ_DECss_i = BJ_DBGs[31 : 0]  ;  
-    `a BUS_GAIN_SFTs_i  = BJ_DBGs[32+: 4]  ;//log 3.1
-    `a BUS_MODEs_i      = BJ_DBGs[37 :36]  ;//0-3:SIN,TRI,SAW,SQU
-    `a REQ_i            = BJ_DBGs[ 38 ] ;
-    `a BUS_LF_ONLY_i    = BJ_DBGs[ 39 ] ;
     `w[3:0] BJO_SELs_i  = BJ_DBGs[43:40] ;
     `include "./MISC/TIMESTAMP.v"         
     `a BJ_DBGOs[63:32] = C_TIMESTAMP ;
-    assign BJ_DBGOs[31:0] = 
-            ( BJO_SELs_i==0)
-            ?                           WAVEs_o  //s11
-            :(BJO_SELs_i==1)
-            ?                           FREQs_o
-            :(BJO_SELs_i==2)
-            ?                           FREQ_QUOs_o
-            :(BJO_SELs_i==3)
-            ?                           FREQ_REMs_o
-            :(BJO_SELs_i==4)
-            ?                           OSC_PHs_o
-            :(BJO_SELs_i==5)
-            ?                           {TIC_o,4'h0,OSC_CTRs_o}
-            :                           ~0
-    ;
-    `a LED_R_o = BJ_DBGs[ 39 ] ;
     `a LED_G_o = BJ_DBGs[ 39 ] ;
     `a LED_B_o = BJ_DBGs[ 39 ] ;
 
@@ -228,8 +184,8 @@ module CQ_MAX10_TOP
     `a P44 = 1'bz ;
     `a P43 = 1'bz ;
     `a P41 = 1'bz ;
-    `a P39 = 1'bz ;
-    `a P38 = WAVE_o ; 
+    `a P39 = DS_R_o ;
+    `a P38 = DS_L_o ; 
     // CN2  
     `a P124 = 1'bz   ;
     `a P127 = 1'bz  ; // 9

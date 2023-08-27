@@ -16,6 +16,7 @@ module AN_TX
     ,`in`tri1           XARST_i
     ,`out`w             DS_R_o
     ,`out`w             DS_L_o
+    ,`out`w             SOUND_LXR_o
 ) ;
     
     `func [63:0] f_GCMs ;
@@ -127,6 +128,7 @@ module AN_TX
     `e
     `a DS_R_o = DS_R ;
     `a DS_L_o = DS_L ;
+    `a SOUND_LXR_o = SOUND_LXR ;
 `emodule
     `define AN_TX
 `endif
