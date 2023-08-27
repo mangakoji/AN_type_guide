@@ -1,0 +1,4 @@
+// TIMESTAMP.v
+// Tue Jun 27 19:13:35 JST 2023
+// 649AB64F
+parameter [31:0] C_TIMESTAMP = 32'h649AB64F ;
