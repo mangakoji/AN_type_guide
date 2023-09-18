@@ -155,6 +155,9 @@ module CQ_MAX10_TOP
     `w[3:0] BJO_SELs_i  = BJ_DBGs[43:40] ;
     `include "./MISC/TIMESTAMP.v"         
     `a BJ_DBGOs[63:32] = C_TIMESTAMP ;
+    `a  BJ_DBGOs[2] =SOUND_LXR_o ;
+    `a BJ_DBGOs[1] =DS_R_o ;
+    `a BJ_DBGOs[0] =DS_L_o ; 
     `a LED_G_o = BJ_DBGs[ 39 ] ;
     `a LED_B_o = BJ_DBGs[ 39 ] ;
 
@@ -183,7 +186,7 @@ module CQ_MAX10_TOP
     `a P45 = 1'bz ;
     `a P44 = 1'bz ;
     `a P43 = 1'bz ;
-    `a P41 = 1'bz ;
+    `a P41 = SOUND_LXR_o ;
     `a P39 = DS_R_o ;
     `a P38 = DS_L_o ; 
     // CN2  

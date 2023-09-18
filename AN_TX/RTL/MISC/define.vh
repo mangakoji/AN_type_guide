@@ -56,8 +56,12 @@
     `endif
 `define max(a,b)    (((a)>(b))?(a):(b))
 `define min(a,b)    (((a)<(b))?(a):(b))
+`define incn(x,n)   x<=((x)+(n))
+`define decn(x,n)   x<=((x)-(n))
 `define inc(x)      x<=((x)+1)
 `define dec(x)      x<=((x)-1)
+`define inc1(x)     `inc(x)
+`define dec1(x)     `dec(x)
 `define is0(x)      ((x)==0)
 `define all0(x)     `is0(x)
 `define all1(x)     (&x)
@@ -70,9 +74,11 @@
 `define abs(x)      (`sign(x)?(-(x)):(x))
 `define cy(x,A)     (&((x)|(~A)))
 `define sfl(x,A)    x<={x,A}
+`define sfrn(x,A,n) x<=(x<<(n))|A
 `define sfr(x,A)    x<=({A,x}>>(`bitw(A)))
 `define div(x)      ((1'b1&x) & (~(1'b1&(x>>1))))
 `define tgl(x)      x<=~(x)
+`define jdg(x)      ((x)!=0)?~0:0
 `define slice(x,n,W) x[((n)*(W))+:(W)]
 `define slice1(x,n,W) x[((n)*(W)-1)+:(W)]
 `define ALL1(N)     {(N){1'b1}}
