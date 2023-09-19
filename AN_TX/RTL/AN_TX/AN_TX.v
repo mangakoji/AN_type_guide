@@ -75,26 +75,28 @@ module AN_TX
     ;
     `r[12:0] DSs ;
     `ack`xar    DSs <= 13'b1_0111_1111_1111 ;
-    else                DSs <= {1'b0,DSs[11:0]}+{1'b0,~SINs[11],SINs[10:0]};
+    else                                DSs<= {1'b0,DSs[11:0]}
+                                            + {1'b0,{3{~SINs[11]}},SINs[10:2]}
+                                        ;
     
 //    `lp C_KEY_SHORT_CKN_SELs = 3 ;//step 1 
-    `func [31:0] f_C_KEY_SHORT_CKNs ;
+    `func [63:0] f_C_KEY_SHORT_CKNs ;
         `in ii ;
     `b
         if( C_SIM_KEY_SHORT_CKNs )
             f_C_KEY_SHORT_CKNs = C_SIM_KEY_SHORT_CKNs ;
         else
             f_C_KEY_SHORT_CKNs=
-                                C_CK_Fs 
+                                (63'd0+C_CK_Fs)
                                 * `slice(
                                     C_KEY_SHORT_CKNss
-                                    ,C_KEY_SHORT_CKN_SELs
+                                    ,ii
                                     ,12
                                 ) / 1000_0 
             ;
     `eefunc
-    `lp C_KEY_SHORT_CKNs = f_C_KEY_SHORT_CKNs( 0 ) ;
-    `lp C_KS_W = $clog2( C_KEY_SHORT_CKNs * C_CK_Fs / 1000_0) ;
+    `lp C_KEY_SHORT_CKNs = f_C_KEY_SHORT_CKNs( C_KEY_SHORT_CKN_SELs ) ;
+    `lp C_KS_W = $clog2( C_KEY_SHORT_CKNs ) ;
     `r[C_KS_W-1:0] KS_CTRs ;
     `w KS_CTR_cy = (KS_CTRs == 0) ;
     localparam C_CODEs = 8'b000_111_0_1; //N

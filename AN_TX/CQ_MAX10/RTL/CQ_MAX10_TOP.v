@@ -185,10 +185,10 @@ module CQ_MAX10_TOP
     `a P46 = 1'bz ;
     `a P45 = 1'bz ;
     `a P44 = 1'bz ;
-    `a P43 = 1'bz ;
-    `a P41 = SOUND_LXR_o ;
-    `a P39 = DS_R_o ;
-    `a P38 = DS_L_o ; 
+    `a P43 = SOUND_LXR_o ;
+    `a P41 = DS_R_o ;
+    `a P39 = DS_L_o ; 
+    `a P38 = DS_L_o ;
     // CN2  
     `a P124 = 1'bz   ;
     `a P127 = 1'bz  ; // 9
