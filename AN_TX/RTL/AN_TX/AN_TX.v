@@ -14,6 +14,7 @@ module AN_TX
     ,parameter C_SIM_KEY_SHORT_CKNs = 0//10_000
 )(   `in`tri1           CK_i
     ,`in`tri1           XARST_i
+    ,`in`tri0[5:0]      BUS_BALANCEs_i
     ,`out`w             DS_R_o
     ,`out`w             DS_L_o
     ,`out`w             SOUND_LXR_o
@@ -73,12 +74,35 @@ module AN_TX
         ,12'd240_0          // class 3
         }
     ;
-    `r[12:0] DSs ;
-    `ack`xar    DSs <= 13'b1_0111_1111_1111 ;
-    else                                DSs<= {1'b0,DSs[11:0]}
-                                            + {1'b0,{3{~SINs[11]}},SINs[10:2]}
+    `w[5:0]R_BALANCEs = 6'd63 - BUS_BALANCEs_i ;
+    `func `s[11:0]f_GAINED ;
+        `in`s[11:0] SINs ;
+        `in`s[ 5:0] GAINs ;
+        `int mul ;
+        `int tmp ;
+    `b      //(12'h800+A)*(B)=B*12'h800+AB
+            //AB=(12'h800+A)*(B)-B*12'h800
+
+            mul = {6'd0,~SINs[11],SINs[10:0]} * {12'd0,GAINs};
+            tmp = mul -{GAINs,11'b0};
+            f_GAINED = tmp >>> 6 ;
+    `e `efunc
+    `w`s[11:0]L_SINs = f_GAINED(SINs, BUS_BALANCEs_i);
+    `w`s[11:0]R_SINs = f_GAINED(SINs, R_BALANCEs    );
+
+    `r[12:0] L_DSs ;
+    `r[12:0] R_DSs ;
+    `ack`xar
+    `b  L_DSs <= 13'b1_0111_1111_1111 ;
+        R_DSs <= 13'b1_0111_1111_1111 ;
+    `e else
+    `b                                  L_DSs<= {1'b0,L_DSs[11:0]}
+                                            + {1'b0, ~L_SINs[11],L_SINs[10:0]}
                                         ;
-    
+                                        R_DSs<= {1'b0,R_DSs[11:0]}
+                                            + {1'b0, ~R_SINs[11],R_SINs[10:0]}
+                                        ;
+    `e
 //    `lp C_KEY_SHORT_CKN_SELs = 3 ;//step 1 
     `func [63:0] f_C_KEY_SHORT_CKNs ;
         `in ii ;
@@ -125,8 +149,8 @@ module AN_TX
             `b                          LXR_LE <= 1'b0 ;
                                         SOUND_LXR <= C_CODEs[PTRNs] ;
             `e
-                                        DS_R<=(~SOUND_LXR)? ~DS_R: DSs[12] ;
-                                        DS_L<=( SOUND_LXR)? ~DS_L: DSs[12] ;
+                                        DS_L<=( SOUND_LXR)? ~DS_L: L_DSs[12] ;
+                                        DS_R<=(~SOUND_LXR)? ~DS_R: R_DSs[12] ;
     `e
     `a DS_R_o = DS_R ;
     `a DS_L_o = DS_L ;
@@ -169,6 +193,7 @@ module TB_AN_TX
         )AN_TX
         (    .CK_i                      ( CK_i              )
             ,.XARST_i                   ( XARST_i           )
+            ,.BUS_BALANCEs_i            ( 6'h20             )
             ,.DS_R_o                    ( DS_R_o            )
             ,.DS_L_o                    ( DS_L_o            )
         ) 

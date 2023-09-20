@@ -124,7 +124,7 @@ module CQ_MAX10_TOP
     `w LED_G_o ;
     `w LED_B_o ;
 
-
+    `w[5:0] BUS_BALANCEs ;
     `w DS_R_o ;
     `w DS_L_o ;
     `w SOUND_LXR_o ;
@@ -135,6 +135,7 @@ module CQ_MAX10_TOP
         )AN_TX
         (    .CK_i                      ( CK_i              )
             ,.XARST_i                   ( XARST_i           )
+            ,.BUS_BALANCEs_i            ( BUS_BALANCEs      )
             ,.DS_R_o                    ( DS_R_o            )
             ,.DS_L_o                    ( DS_L_o            )
             ,.SOUND_LXR_o               ( SOUND_LXR_o       )
@@ -160,6 +161,8 @@ module CQ_MAX10_TOP
     `a BJ_DBGOs[0] =DS_L_o ; 
     `a LED_G_o = BJ_DBGs[ 39 ] ;
     `a LED_B_o = BJ_DBGs[ 39 ] ;
+
+    `a BUS_BALANCEs = BJ_DBGs[5:0] ;
 
 
     // pin port list
