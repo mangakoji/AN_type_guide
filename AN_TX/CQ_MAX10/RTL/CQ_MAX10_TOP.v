@@ -135,7 +135,8 @@ module CQ_MAX10_TOP
         )AN_TX
         (    .CK_i                      ( CK_i              )
             ,.XARST_i                   ( XARST_i           )
-            ,.BUS_BALANCEs_i            ( BUS_BALANCEs      )
+            ,.BUS_BALANCEs_i            (~0                 )
+            ///BUS_BALANCEs      )
             ,.DS_R_o                    ( DS_R_o            )
             ,.DS_L_o                    ( DS_L_o            )
             ,.SOUND_LXR_o               ( SOUND_LXR_o       )
