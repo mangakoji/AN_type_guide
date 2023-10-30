@@ -131,7 +131,8 @@ module CQ_MAX10_TOP
     AN_TX
         #(   .C_CK_Fs                   ( C_F_CKM           )
             ,.C_TONE_Fs                 ( 440               )
-//            ,.C_SIM_KEY_SHORT_CKNs      ( 0 )
+            ,.C_KEY_SHORT_CKN_SELs      ( 5                 )
+//            ,.C_SIM_KEY_SHORT_CKNs      ()
         )AN_TX
         (    .CK_i                      ( CK_i              )
             ,.XARST_i                   ( XARST_i           )

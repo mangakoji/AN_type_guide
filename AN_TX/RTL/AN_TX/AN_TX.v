@@ -66,12 +66,12 @@ module AN_TX
     ;
         // short point[100us] // class
      `lp C_KEY_SHORT_CKNss = {
-         12'd33_3           // master
-        ,12'd50_0           // step 3
-        ,12'd66_7           // step 1
-        ,12'd100_0          // class 1
-        ,12'd133_3          // class 2
-        ,12'd240_0          // class 3
+         12'd33_3           //5 master
+        ,12'd50_0           //4 step 3
+        ,12'd66_7           //3 step 1
+        ,12'd100_0          //2 class 1
+        ,12'd133_3          //1 class 2
+        ,12'd240_0          //0 class 3
         }
     ;
     `w[5:0]L_BALANCEs = (BUS_BALANCEs_i==63)? 6'h20 : BUS_BALANCEs_i ;
