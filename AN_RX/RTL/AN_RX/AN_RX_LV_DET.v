@@ -139,7 +139,7 @@ module AN_RX_LV_DET
             if( MIC_Ds[1] )
             `b                          SIN_SIGMAs<=
                                             SIN_SIGMAs 
-                                            + {{12{SINs}},SINs} 
+                                            + {{12{SINs[11]}},SINs} 
                                         ;
                                         COS_SIGMAs<=
                                             COS_SIGMAs 
@@ -160,8 +160,8 @@ module AN_RX_LV_DET
             `b
                                         SIN_SIGMAs_D<= SIN_SIGMAs; 
                                         COS_SIGMAs_D<= COS_SIGMAs; 
-                                        CIC_SINs<=(SIN_SIGMAs-SIN_SIGMAs_D)>>>12; 
-                                        CIC_COSs<=(COS_SIGMAs-COS_SIGMAs_D)>>>12; 
+                                        CIC_SINs<=(SIN_SIGMAs-SIN_SIGMAs_D)>>>10; 
+                                        CIC_COSs<=(COS_SIGMAs-COS_SIGMAs_D)>>>10; 
             `e
         `e
     `e
@@ -233,9 +233,13 @@ module TB_AN_RX_LV_DET
         XARST_i <= 1'b0 ;
         #10.5 XARST_i <= 1'b1 ;
     `e
-    `w[11:0] SINs ;
+    `w`s[11:0] SINs ;
+    `w`s[11:0] COSs ;
     `init force SINs = AN_RX_LV_DET.SINs ;
-    `w[11:0] SINs_sft = {~SINs[11],SINs[9:0]};
+    `init force COSs = AN_RX_LV_DET.COSs ;
+//    `w`s[12:0] SCOSs_sft =  {SINs[11],SINs[10:0],1'b0};
+//    `w`s[12:0] SCOSs_sft = {COSs[11],COSs[10:0],1'b0};
+    `w`s[12:0] SCOSs_sft = {SINs[11],SINs[11:0]}+{COSs[11],COSs[11:0]};
 
     `r[12:0] IIRs ;
     `w      MIC_CK_o ;
@@ -245,7 +249,7 @@ module TB_AN_RX_LV_DET
         MIC_CK_D <= 1'b0;
     `eelse
     `b                                  MIC_CK_D <= MIC_CK_o;
-        if(~ MIC_CK_D & MIC_CK_o)       IIRs<={1'b0,IIRs}+{1'b0,SINs_sft};
+        if(~ MIC_CK_D & MIC_CK_o)       IIRs<={1'b0,IIRs[11:0]}+{1'b0,~SCOSs_sft[12],SCOSs_sft[11:1]};
     `e
     `w MIC_i    = IIRs[12] ;
     parameter C_CK_Fs   = 48_000_000     ;
