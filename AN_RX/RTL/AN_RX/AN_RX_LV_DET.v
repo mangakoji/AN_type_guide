@@ -122,8 +122,8 @@ module AN_RX_LV_DET
     `r`s[23:0]COS_SIGMAs;
     `r`s[23:0]SIN_SIGMAs_D;
     `r`s[23:0]COS_SIGMAs_D;
-    `r`s[11:0]CIC_SINs;   // 440Hz sampled CIC LPF out
-    `r`s[11:0]CIC_COSs;   
+    `r`s[12:0]CIC_SINs;   // 440Hz sampled CIC LPF out
+    `r`s[12:0]CIC_COSs;   
     `ack`xar
     `b  SIN_SIGMAs<=0;
         COS_SIGMAs<=0;
@@ -165,22 +165,22 @@ module AN_RX_LV_DET
             `e
         `e
     `e
-    `w`s[11:0] mul_A_s = (TONE_CY_Ds[3])? CIC_SINs : CIC_COSs ;
-    `r[11:0] MUL_AYs ;
+    `w`s[12:0] mul_A_s = (TONE_CY_Ds[3])? CIC_SINs : CIC_COSs ;
+    `r`s[12:0] MUL_AYs ;
     `ack`xar MUL_AYs = 0 ;
     else
-    `b  if(mul_A_s[11])                 MUL_AYs = -mul_A_s ;
+    `b  if(mul_A_s[12])                 MUL_AYs = -mul_A_s ;
         else                            MUL_AYs = mul_A_s ;
-        if(MUL_AYs>=12'h800)            MUL_AYs = 12'h7FF ;
+        if(MUL_AYs>=13'h1000)            MUL_AYs = 13'hFFF ;
     `e
-    `r[21:0]CIC_MULs;
+    `r[23:0]CIC_MULs;
     `ack`xar CIC_MULs <=0 ;
     else                                CIC_MULs <= 
-                                            {11'd0,MUL_AYs} 
-                                            * {11'd0,MUL_AYs} 
+                                            {12'd0,MUL_AYs} 
+                                            * {12'd0,MUL_AYs} 
                                         ;
 
-    `r[22:0]CIC_SQU_ADDs ;
+    `r[23:0]CIC_SQU_ADDs ;
     `ack`xar
     `b  CIC_SQU_ADDs <= 0;
     `eelse
@@ -235,11 +235,23 @@ module TB_AN_RX_LV_DET
     `e
     `w`s[11:0] SINs ;
     `w`s[11:0] COSs ;
+    `int xx,yy,zz ;
     `init force SINs = AN_RX_LV_DET.SINs ;
     `init force COSs = AN_RX_LV_DET.COSs ;
 //    `w`s[12:0] SCOSs_sft =  {SINs[11],SINs[10:0],1'b0};
+//    `w`s[12:0] SCOSs_sft =  {{3{SINs[11]}},SINs[10:1]};
+
+     `r`s[12:0] SCOSs_sft ;
+    always@(*)
+    `b  case( zz )
+            0:     SCOSs_sft      =  {SINs[11],SINs} ;
+            1:     SCOSs_sft      =  SINs[11] ? 13'h1800 : 13'h07FF ;
+            2:     SCOSs_sft      =  {SINs,1'b0} ;
+            3:     SCOSs_sft      =  SINs[11] ? 13'h1000 : 13'h0FFF ;
+        `ecase
+    `e
 //    `w`s[12:0] SCOSs_sft = {COSs[11],COSs[10:0],1'b0};
-    `w`s[12:0] SCOSs_sft = {SINs[11],SINs[11:0]}+{COSs[11],COSs[11:0]};
+//    `w`s[12:0] SCOSs_sft = {SINs[11],SINs[11:0]}+{COSs[11],COSs[11:0]};
 
     `r[12:0] IIRs ;
     `w      MIC_CK_o ;
@@ -272,13 +284,12 @@ module TB_AN_RX_LV_DET
     ;
 
     `lp C_X_CYCLEs = 1000;
-    `lp C_Y_CYCLEs = 1000;
-    `lp C_Z_CYCLEs = 1000 ;
-    `int xx,yy,zz ;
+    `lp C_Y_CYCLEs = 500;
+    `lp C_Z_CYCLEs = 4 ;
     `init
-    `b  
+    `b  xx=0;yy=0;zz=0;
         repeat(100)@(`pe CK_i);
-        repeat( 2 )
+        repeat( 2 )@(`pe CK_i);
         `fori(zz,C_Z_CYCLEs)
         `b `fori(yy,C_Y_CYCLEs)
           `b `fori(xx,C_X_CYCLEs)
