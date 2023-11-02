@@ -99,7 +99,8 @@ module CQ_MAX10_TOP
     // start
     `lp C_F_CKX = 48_000_000 ;//xtal clock speed 
 //    `lp C_F_CKM = 48_000_000 * 5 * 9 / 16  ;// 135MHz
-    `lp C_F_CKM  = 135_000_000 ;
+//    `lp C_F_CKM  = 135_000_000 ;
+    `lp C_F_CKM = C_F_CKX ;
     wire            pll_locked      ;
     reg [1:0]       PLL_LOCKED_Ds   ;
     wire            XARST           ;
@@ -124,27 +125,26 @@ module CQ_MAX10_TOP
     `w LED_G_o ;
     `w LED_B_o ;
 
-    `w[5:0] BUS_BALANCEs ;
-    `w DS_R_o ;
-    `w DS_L_o ;
-    `w SOUND_LXR_o ;
-    AN_TX
-        #(   .C_CK_Fs                   ( C_F_CKM           )
-            ,.C_TONE_Fs                 ( 440               )
-            ,.C_KEY_SHORT_CKN_SELs      ( 5                 )
-//            ,.C_SIM_KEY_SHORT_CKNs      ()
-        )AN_TX
-        (    .CK_i                      ( CK_i              )
-            ,.XARST_i                   ( XARST_i           )
-            ,.BUS_BALANCEs_i            (~0                 )
-            ///BUS_BALANCEs      )
-            ,.DS_R_o                    ( DS_R_o            )
-            ,.DS_L_o                    ( DS_L_o            )
-            ,.SOUND_LXR_o               ( SOUND_LXR_o       )
+    `w              MIC_CK_o    ;
+    `w              MIC_i   ;
+    `w[11:0]       LVs_o    ;
+    `w             LV_o     ;
+    `w             DONE_o   ;
+    AN_RX_LV_DET
+        #(   .C_CK_Fs                   ( C_F_CKM       )
+            ,.C_TONE_Fs                 ( 440           )
+        )AN_RX_LV_DET
+        (    .CK_i                      ( CK_i          )
+            ,.XARST_i                   ( XARST_i       )
+            ,.MIC_i                     ( MIC_i         )
+            ,.MIC_CK_o                  ( MIC_CK_o      )
+            ,.LVs_o                     ( LVs_o         )
+            ,.LV_o                      ( LV_o          )
+            ,.DONE_o                    ( DONE_o        )
         ) 
     ;
-    `a LED_R_o = SOUND_LXR_o ;
-
+    `a LED_R_o = LV_o ;
+ 
     // JTAG Test I/Os
     wire [63:0] BJ_DBGOs ;
     wire [63:0] BJ_DBGs ;
@@ -158,13 +158,9 @@ module CQ_MAX10_TOP
     `w[3:0] BJO_SELs_i  = BJ_DBGs[43:40] ;
     `include "./MISC/TIMESTAMP.v"         
     `a BJ_DBGOs[63:32] = C_TIMESTAMP ;
-    `a  BJ_DBGOs[2] =SOUND_LXR_o ;
-    `a BJ_DBGOs[1] =DS_R_o ;
-    `a BJ_DBGOs[0] =DS_L_o ; 
+    `a  BJ_DBGOs[11:0] = LVs_o ;
     `a LED_G_o = BJ_DBGs[ 39 ] ;
     `a LED_B_o = BJ_DBGs[ 39 ] ;
-
-    `a BUS_BALANCEs = BJ_DBGs[5:0] ;
 
 
     // pin port list
@@ -175,11 +171,11 @@ module CQ_MAX10_TOP
     `a XLED_G_o = ~LED_G_o  ;//122
     `a XLED_B_o = ~LED_B_o  ;//121
     // CN1
-    `a P62 = 1'bz ;
-    `a P61 = 1'bz ;
+    `a P62 = MIC_CK_o ;// 1'bz ;
+    `a P61 = 1'b0 ; //1'bz ;
     `a P60 = 1'bz ;
-    `a P59 = 1'bz ;
-    `a P58 = 1'bz ;
+    `a MIC_i = P59 ;//= 1'bz ;
+    `a P58 = 1'b0 ;//1'bz ;
     `a P57 = 1'bz ;
     `a P56 = 1'bz ;
     `a P55 = 1'bz ;
@@ -188,12 +184,12 @@ module CQ_MAX10_TOP
     `a P48 = 1'bz ;
     `a P47 = 1'bz ;
     `a P46 = 1'bz ;
-    `a P45 = 1'bz ;
+    `a P45 = LV_o ;//1'bz ;
     `a P44 = 1'bz ;
-    `a P43 = SOUND_LXR_o ;
-    `a P41 = DS_R_o ;
-    `a P39 = DS_L_o ; 
-    `a P38 = DS_L_o ;
+    `a P43 = 1'bz ;
+    `a P41 = 1'bz ;
+    `a P39 = 1'bz ; 
+    `a P38 = 1'bz ;
     // CN2  
     `a P124 = 1'bz   ;
     `a P127 = 1'bz  ; // 9

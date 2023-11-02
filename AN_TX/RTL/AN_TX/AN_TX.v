@@ -106,18 +106,20 @@ module AN_TX
     `e
 //    `lp C_KEY_SHORT_CKN_SELs = 3 ;//step 1 
     `func [63:0] f_C_KEY_SHORT_CKNs ;
-        `in ii ;
+        `in`int ii ;
     `b
         if( C_SIM_KEY_SHORT_CKNs )
             f_C_KEY_SHORT_CKNs = C_SIM_KEY_SHORT_CKNs ;
         else
-            f_C_KEY_SHORT_CKNs=
-                                (63'd0+C_CK_Fs)
-                                * `slice(
-                                    C_KEY_SHORT_CKNss
-                                    ,ii
-                                    ,12
-                                ) / 1000_0 
+            f_C_KEY_SHORT_CKNs=(
+                                    (72'd0+C_CK_Fs)
+                                    * `slice
+                                    (
+                                         C_KEY_SHORT_CKNss
+                                        , ii
+                                        , 12
+                                    )
+                                 ) / 1000_0 
             ;
     `eefunc
     `lp C_KEY_SHORT_CKNs = f_C_KEY_SHORT_CKNs( C_KEY_SHORT_CKN_SELs ) ;
@@ -127,7 +129,7 @@ module AN_TX
     localparam C_CODEs = 8'b000_111_0_1; //N
     reg[ 2:0]PTRNs ;
     `ack`xar
-    `b  KS_CTRs <= C_KEY_SHORT_CKNs-1 ;
+    `b  KS_CTRs <= 0 ;//C_KEY_SHORT_CKNs-1 ;
         PTRNs <= 0 ;
     `eelse
     `b
@@ -143,6 +145,8 @@ module AN_TX
     `ack`xar
     `b  SOUND_LXR <= 1'b0;
         LXR_LE<=1'b0;
+        DS_L <= 0 ;
+        DS_R <= 0 ;
     `eelse
     `b  if(KS_CTR_cy)                   LXR_LE <= 1'b1 ;
         if(LXR_LE)
@@ -191,6 +195,10 @@ module TB_AN_TX
         #(   .C_CK_Fs                   ( C_CK_Fs           )
             ,.C_TONE_Fs                 ( C_CK_Fs*3/4/4096  )
             ,.C_SIM_KEY_SHORT_CKNs      ( 4096*3            )
+//        #(   .C_CK_Fs                   ( 135_000_000       )
+//            ,.C_TONE_Fs                 ( 440               )
+//            ,.C_SIM_KEY_SHORT_CKNs      ( 0                 )
+//            ,.C_KEY_SHORT_CKN_SELs      ( 5                 )
         )AN_TX
         (    .CK_i                      ( CK_i              )
             ,.XARST_i                   ( XARST_i           )
@@ -199,7 +207,27 @@ module TB_AN_TX
             ,.DS_L_o                    ( DS_L_o            )
         ) 
     ;
-
+    `r[15:0] IIRs_R ;
+    `r[15:0] IIRs_L ;
+    `ack`xar 
+    `b  IIRs_R <= {1'b1,15'd0} ;
+        IIRs_L <= {1'b1,15'd0} ;
+    `eelse
+    `b                                  IIRs_R <= 
+                                            IIRs_R 
+                                            + (
+                                                {12{DS_R_o}} 
+                                                - IIRs_R[15-:12]
+                                            ) 
+                                        ;
+                                        IIRs_L <= 
+                                            IIRs_L 
+                                            + (
+                                                {12{DS_L_o}} 
+                                                - IIRs_L[15-:12]
+                                            )
+                                       ;
+    `e
     `lp C_X_CYCLEs = 100 ;
     `lp C_Y_CYCLEs = 100 ;
     `lp C_Z_CYCLEs = 100 ;
