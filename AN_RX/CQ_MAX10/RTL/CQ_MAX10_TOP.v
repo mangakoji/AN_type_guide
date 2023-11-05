@@ -172,7 +172,7 @@ module CQ_MAX10_TOP
     `a XLED_B_o = ~LED_B_o  ;//121
     // CN1
     `a P62 = MIC_CK_o ;// 1'bz ;
-    `a P61 = 1'b0 ; //1'bz ;
+    `a P61 = 1'b1 ; //1'bz ;
     `a P60 = 1'bz ;
     `a MIC_i = P59 ;//= 1'bz ;
     `a P58 = 1'b0 ;//1'bz ;
@@ -188,8 +188,8 @@ module CQ_MAX10_TOP
     `a P44 = 1'bz ;
     `a P43 = 1'bz ;
     `a P41 = 1'bz ;
-    `a P39 = 1'bz ; 
-    `a P38 = 1'bz ;
+    `a P39 = 1'b0 ; 
+    `a P38 = LV_o ;
     // CN2  
     `a P124 = 1'bz   ;
     `a P127 = 1'bz  ; // 9
