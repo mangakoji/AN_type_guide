@@ -125,8 +125,10 @@ module CQ_MAX10_TOP
     `w LED_B_o ;
 
     `w[5:0] BUS_BALANCEs ;
-    `w DS_R_o ;
-    `w DS_L_o ;
+    `w DS_R_o  ;
+    `w XDS_R_o ;
+    `w DS_L_o  ;
+    `w XDS_L_o ;
     `w SOUND_LXR_o ;
     AN_TX
         #(   .C_CK_Fs                   ( C_F_CKM           )
@@ -138,8 +140,11 @@ module CQ_MAX10_TOP
             ,.XARST_i                   ( XARST_i           )
             ,.BUS_BALANCEs_i            (~0                 )
             ///BUS_BALANCEs      )
+            ,.BUS_GAINs_i               ( 6'h01             )
             ,.DS_R_o                    ( DS_R_o            )
+            ,.XDS_R_o                   ( XDS_R_o           )
             ,.DS_L_o                    ( DS_L_o            )
+            ,.XDS_L_o                   ( XDS_L_o           )
             ,.SOUND_LXR_o               ( SOUND_LXR_o       )
         ) 
     ;
@@ -187,13 +192,13 @@ module CQ_MAX10_TOP
     `a P50 = 1'bz ;
     `a P48 = 1'bz ;
     `a P47 = 1'bz ;
-    `a P46 = 1'bz ;
-    `a P45 = 1'bz ;
-    `a P44 = 1'bz ;
-    `a P43 = SOUND_LXR_o ;
-    `a P41 = DS_R_o ;
+    `a P46 = SOUND_LXR_o ;
+    `a P45 = 1'b0 ;
+    `a P44 = XDS_R_o ;
+    `a P43 = DS_R_o ;
+    `a P41 = 1'b0 ;
     `a P39 = DS_L_o ; 
-    `a P38 = DS_L_o ;
+    `a P38 = XDS_L_o ;
     // CN2  
     `a P124 = 1'bz   ;
     `a P127 = 1'bz  ; // 9

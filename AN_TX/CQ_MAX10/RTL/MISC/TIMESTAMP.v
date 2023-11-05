@@ -1,4 +1,4 @@
 // TIMESTAMP.v
-// Thu Nov 02 23:23:28 JST 2023
-// 6543B0E0
-parameter [31:0] C_TIMESTAMP = 32'h6543B0E0 ;
+// Sun Nov 05 19:41:28 JST 2023
+// 65477158
+parameter [31:0] C_TIMESTAMP = 32'h65477158 ;

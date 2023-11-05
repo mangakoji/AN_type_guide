@@ -15,8 +15,11 @@ module AN_TX
 )(   `in`tri1           CK_i
     ,`in`tri1           XARST_i
     ,`in`tri1[5:0]      BUS_BALANCEs_i
+    ,`in`tri0[5:0]      BUS_GAINs_i
     ,`out`w             DS_R_o
+    ,`out`w             XDS_R_o
     ,`out`w             DS_L_o
+    ,`out`w             XDS_L_o
     ,`out`w             SOUND_LXR_o
 ) ;
     
@@ -74,11 +77,11 @@ module AN_TX
         ,12'd240_0          //0 class 3
         }
     ;
-    `w[5:0]L_BALANCEs = (BUS_BALANCEs_i==63)? 6'h20 : BUS_BALANCEs_i ;
-    `w[5:0]R_BALANCEs = (BUS_BALANCEs_i==63)? 6'h20 : (6'd62 - BUS_BALANCEs_i) ;
+    `w[5:0]L_BALANCEs = (BUS_BALANCEs_i==63)? BUS_GAINs_i : BUS_BALANCEs_i ;
+    `w[5:0]R_BALANCEs = (BUS_BALANCEs_i==63)? BUS_GAINs_i : (6'd62 - BUS_BALANCEs_i) ;
     `func `s[11:0]f_GAINED ;
         `in`s[11:0] SINs ;
-        `in`s[ 5:0] GAINs ;
+        `in  [ 5:0] GAINs ;
         `int mul ;
         `int tmp ;
     `b      //(12'h800+A)*(B)=B*12'h800+AB
@@ -141,12 +144,16 @@ module AN_TX
     `r LXR_LE ;
     `r SOUND_LXR ;
     `r DS_L ;
+    `r XDS_L ;
     `r DS_R ;
+    `r XDS_R ;
     `ack`xar
     `b  SOUND_LXR <= 1'b0;
         LXR_LE<=1'b0;
-        DS_L <= 0 ;
-        DS_R <= 0 ;
+        DS_L  <= 0 ;
+        XDS_L <= 1 ;
+        DS_R  <= 0 ;
+        XDS_R <= 1 ;
     `eelse
     `b  if(KS_CTR_cy)                   LXR_LE <= 1'b1 ;
         if(LXR_LE)
@@ -155,10 +162,14 @@ module AN_TX
                                         SOUND_LXR <= C_CODEs[PTRNs] ;
             `e
                                         DS_L<=( SOUND_LXR)? ~DS_L: L_DSs[12] ;
+                                        XDS_L<=~(( SOUND_LXR)? ~DS_L: L_DSs[12]) ;
                                         DS_R<=(~SOUND_LXR)? ~DS_R: R_DSs[12] ;
+                                        XDS_R<=~((~SOUND_LXR)? ~DS_R: R_DSs[12] );
     `e
     `a DS_R_o = DS_R ;
+    `a XDS_R_o = XDS_R ;
     `a DS_L_o = DS_L ;
+    `a XDS_L_o = XDS_L ;
     `a SOUND_LXR_o = SOUND_LXR ;
 `emodule
     `define AN_TX
