@@ -14,8 +14,8 @@ module AN_TX
     ,parameter C_SIM_KEY_SHORT_CKNs = 0//10_000
 )(   `in`tri1           CK_i
     ,`in`tri1           XARST_i
-    ,`in`tri1[5:0]      BUS_BALANCEs_i
-    ,`in`tri0[5:0]      BUS_GAINs_i
+    ,`in`tri1[ 5:0]     BUS_BALANCEs_i
+    ,`in`tri0[11:0]     BUS_GAINs_i
     ,`out`w             DS_R_o
     ,`out`w             XDS_R_o
     ,`out`w             DS_L_o
@@ -77,11 +77,31 @@ module AN_TX
         ,12'd240_0          //0 class 3
         }
     ;
-    `w[5:0]L_BALANCEs = (BUS_BALANCEs_i==63)? BUS_GAINs_i : BUS_BALANCEs_i ;
-    `w[5:0]R_BALANCEs = (BUS_BALANCEs_i==63)? BUS_GAINs_i : (6'd62 - BUS_BALANCEs_i) ;
-    `func `s[11:0]f_GAINED ;
+    // BUS_BALANCEs_i==6'h1F is center
+    // 0123456789ABCDEF
+    // 0234567888888888
+    // 8888888876543208
+    `w[5:0]L_BALANCEs = 
+        (BUS_BALANCEs_i==63)
+        ?                           6'h20 
+        :(BUS_BALANCEs_i>='h1F)
+        ?                           6'h20
+        :(BUS_BALANCEs_i==0)
+        ?                           6'h00
+        :                           BUS_BALANCEs_i[4:0]+1
+    ;
+    `w[5:0]R_BALANCEs = 
+        (BUS_BALANCEs_i==63)
+        ?                           6'h20
+        :(BUS_BALANCEs_i<='h1F)
+        ?                           6'h20
+        :(BUS_BALANCEs_i==63)         
+        ?                           6'h00
+        :                           {1'b0,~BUS_BALANCEs_i[4:0]}
+    ;
+    `func `s[23:0]f_GAINED ;
         `in`s[11:0] SINs ;
-        `in  [ 5:0] GAINs ;
+        `in  [11:0] GAINs ;
         `int mul ;
         `int tmp ;
     `b      //(12'h800+A)*(B)=B*12'h800+AB
@@ -89,22 +109,22 @@ module AN_TX
 
             mul = {6'd0,~SINs[11],SINs[10:0]} * {12'd0,GAINs};
             tmp = mul -{GAINs,11'b0};
-            f_GAINED = tmp >>> 6 ;
+            f_GAINED = tmp  ;
     `e `efunc
-    `w`s[11:0]L_SINs = f_GAINED(SINs, L_BALANCEs);
-    `w`s[11:0]R_SINs = f_GAINED(SINs, R_BALANCEs);
+    `w`s[23:0]L_SINs = f_GAINED(SINs, BUS_GAINs_i ) ;//L_BALANCEs);
+    `w`s[23:0]R_SINs = f_GAINED(SINs, BUS_GAINs_i ) ;//R_BALANCEs);
 
-    `r[12:0] L_DSs ;
-    `r[12:0] R_DSs ;
+    `r[24:0] L_DSs ;
+    `r[24:0] R_DSs ;
     `ack`xar
-    `b  L_DSs <= 13'b1_0111_1111_1111 ;
-        R_DSs <= 13'b1_0111_1111_1111 ;
+    `b  L_DSs <= 25'b1_0111_1111_1111_1111_1111_1111 ;
+        R_DSs <= 25'b1_0111_1111_1111_1111_1111_1111 ;
     `e else
-    `b                                  L_DSs<= {1'b0,L_DSs[11:0]}
-                                            + {1'b0, ~L_SINs[11],L_SINs[10:0]}
+    `b                                  L_DSs<= {1'b0,L_DSs[23:0]}
+                                            + {1'b0, ~L_SINs[23],L_SINs[22:0]}
                                         ;
-                                        R_DSs<= {1'b0,R_DSs[11:0]}
-                                            + {1'b0, ~R_SINs[11],R_SINs[10:0]}
+                                        R_DSs<= {1'b0,R_DSs[23:0]}
+                                            + {1'b0, ~R_SINs[23],R_SINs[22:0]}
                                         ;
     `e
 //    `lp C_KEY_SHORT_CKN_SELs = 3 ;//step 1 
@@ -161,10 +181,10 @@ module AN_TX
             `b                          LXR_LE <= 1'b0 ;
                                         SOUND_LXR <= C_CODEs[PTRNs] ;
             `e
-                                        DS_L<=( SOUND_LXR)? ~DS_L: L_DSs[12] ;
-                                        XDS_L<=~(( SOUND_LXR)? ~DS_L: L_DSs[12]) ;
-                                        DS_R<=(~SOUND_LXR)? ~DS_R: R_DSs[12] ;
-                                        XDS_R<=~((~SOUND_LXR)? ~DS_R: R_DSs[12] );
+                                        DS_L<=( SOUND_LXR)? ~DS_L: L_DSs[24] ;
+                                        XDS_L<=~(( SOUND_LXR)? ~DS_L: L_DSs[24]) ;
+                                        DS_R<=(~SOUND_LXR)? ~DS_R: R_DSs[24] ;
+                                        XDS_R<=~((~SOUND_LXR)? ~DS_R: R_DSs[24] );
     `e
     `a DS_R_o = DS_R ;
     `a XDS_R_o = XDS_R ;
@@ -213,7 +233,8 @@ module TB_AN_TX
         )AN_TX
         (    .CK_i                      ( CK_i              )
             ,.XARST_i                   ( XARST_i           )
-            ,.BUS_BALANCEs_i            ( 6'h20             )
+            ,.BUS_BALANCEs_i            ( ~0                )
+            ,.BUS_GAINs_i               ( 12'h010           )
             ,.DS_R_o                    ( DS_R_o            )
             ,.DS_L_o                    ( DS_L_o            )
         ) 

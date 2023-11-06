@@ -140,7 +140,7 @@ module CQ_MAX10_TOP
             ,.XARST_i                   ( XARST_i           )
             ,.BUS_BALANCEs_i            (~0                 )
             ///BUS_BALANCEs      )
-            ,.BUS_GAINs_i               ( 6'h01             )
+            ,.BUS_GAINs_i               ( 12'h008           )
             ,.DS_R_o                    ( DS_R_o            )
             ,.XDS_R_o                   ( XDS_R_o           )
             ,.DS_L_o                    ( DS_L_o            )
