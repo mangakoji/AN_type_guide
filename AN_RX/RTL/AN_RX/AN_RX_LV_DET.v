@@ -202,9 +202,27 @@ module AN_RX_LV_DET
         )
     ;
     `a LVs_o = SQRT_QQs ;
+
+    `r[11:0] LV_LOGs ;
+    `ack`xar LV_LOGs<=0 ;
+    else casex(SQRT_QQs)
+            12'b1xxx_xxxx_xxxx:         LV_LOGs<= {4'hF,SQRT_QQs[10:3]};
+            12'b01xx_xxxx_xxxx:         LV_LOGs<= {4'hE,SQRT_QQs[ 9:2]};
+            12'b001x_xxxx_xxxx:         LV_LOGs<= {4'hD,SQRT_QQs[ 8:1]};
+            12'b0001_xxxx_xxxx:         LV_LOGs<= {4'hC,SQRT_QQs[ 7:0]};
+            12'b0000_1xxx_xxxx:         LV_LOGs<= {4'hB,SQRT_QQs[ 6:0],1'b1};
+            12'b0000_01xx_xxxx:         LV_LOGs<= {4'hA,SQRT_QQs[ 5:0],2'h2};
+            12'b0000_001x_xxxx:         LV_LOGs<= {4'h9,SQRT_QQs[ 4:0],3'h4};
+            12'b0000_0001_xxxx:         LV_LOGs<= {4'h8,SQRT_QQs[ 3:0],4'h8};
+            12'b0000_0x00_1xxx:         LV_LOGs<= {4'h7,SQRT_QQs[ 2:0],5'h10};
+            12'b0000_0000_01xx:         LV_LOGs<= {4'h6,SQRT_QQs[ 1:0],6'h20};
+            12'b0000_0000_001x:         LV_LOGs<= {4'h5,SQRT_QQs[ 0]  ,7'h40};
+            12'b0000_0000_00x1:         LV_LOGs<= {4'h4,8'h80};
+            12'b0000_0000_0000:         LV_LOGs<= {4'h3,8'h80};
+        endcase
     `r[12:0]IIRs ;
     `ack`xar IIRs <= 13'h0_800 ;
-    else IIRs<={1'b0,IIRs[11:0]}+{1'b0,SQRT_QQs};
+    else IIRs<={1'b0,IIRs[11:0]}+{1'b0,LV_LOGs};
     `a LV_o = IIRs[12] ;
 `emodule
     `define AN_RX_LV_DET
